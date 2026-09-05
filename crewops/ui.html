@@ -456,6 +456,118 @@ input, select { font: inherit; color: inherit; }
     z-index: 1;
 }
 
+
+/* Cockpit Console Container & Flight Filters Ribbon */
+.cockpit-console-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.crewops-filter-bar-wrapper {
+    padding: 8px 24px 0 24px;
+    flex-shrink: 0;
+    background: transparent;
+}
+
+.copilot-status-pill {
+    font-size: 0.7rem;
+    color: var(--brand-green-strong);
+    font-family: var(--font-mono);
+    background: var(--brand-green-soft);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--brand-green);
+    white-space: nowrap;
+}
+
+.btn-copilot-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    color: var(--ink-secondary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-copilot-toggle:hover {
+    background: var(--brand-green-soft);
+    color: var(--brand-green-strong);
+    border-color: var(--brand-green);
+}
+
+.copilot-minimized-flight-deck {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--surface-1);
+}
+
+.wave-monitor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--hairline);
+    flex-shrink: 0;
+}
+
+.wave-monitor-table-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.compact-wave-table th {
+    position: sticky;
+    top: 0;
+    background: var(--surface-2);
+    z-index: 2;
+    padding: 6px 10px;
+    font-size: 0.68rem;
+}
+
+.compact-wave-table td {
+    padding: 6px 10px;
+    font-size: 0.74rem;
+}
+
+.compact-wave-table tr.disrupted-row {
+    background: rgba(224, 82, 82, 0.08);
+    border-left: 3px solid var(--status-critical);
+}
+
+.compact-wave-table tr.disrupted-row:hover {
+    background: rgba(224, 82, 82, 0.14);
+}
+
+.compact-wave-table tr.covered-row {
+    border-left: 3px solid var(--brand-green);
+}
+
+.compact-wave-table tr.interactive-row {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.compact-wave-table tr.interactive-row:hover {
+    background: var(--surface-3);
+}
+
 /* PANE 1: DISRUPTION RADAR & SIMULATION POWER BUTTONS (LEFT) */
 .pane-radar-left {
     display: flex;
@@ -2049,9 +2161,76 @@ input, select { font: inherit; color: inherit; }
         </div>
 
         <!-- ==========================================================================
-           MAIN OCC 3-PANE COCKPIT VIEW
+           MAIN OCC COCKPIT VIEW (WITH TOP FLIGHT FILTERS & 3-PANE STAGE)
            ========================================================================== -->
-        <main id="viewConsolePane" class="cockpit-3pane-stage">
+        <main id="viewConsolePane" class="cockpit-console-container">
+            <!-- Top Flight Filters Ribbon for Crew Ops Page -->
+            <div class="crewops-filter-bar-wrapper">
+                <div class="flight-view-top-ribbon" style="border-radius:8px 8px 0 0; margin-bottom:0;">
+                    <!-- Operational Shift Time Blocks (Wave Slicing) -->
+                    <div class="shift-blocks-group">
+                        <span class="block-group-label"><i class="fa-solid fa-clock"></i> Shift Waves:</span>
+                        <button class="shift-block-pill active" id="crewPillBlockAll" onclick="setShiftBlock('all')">All Day</button>
+                        <button class="shift-block-pill" id="crewPillBlock1" onclick="setShiftBlock('b1')">Block 1 (00:00-05:59)</button>
+                        <button class="shift-block-pill" id="crewPillBlock2" onclick="setShiftBlock('b2')">Block 2 (06:00-08:59)</button>
+                        <button class="shift-block-pill" id="crewPillBlock3" onclick="setShiftBlock('b3')">Block 3 (09:00-11:59)</button>
+                        <button class="shift-block-pill" id="crewPillBlock4" onclick="setShiftBlock('b4')">Block 4 (12:00-14:59)</button>
+                        <button class="shift-block-pill" id="crewPillBlock5" onclick="setShiftBlock('b5')">Block 5 (15:00-17:59)</button>
+                        <button class="shift-block-pill" id="crewPillBlock6" onclick="setShiftBlock('b6')">Block 6 (18:00-23:59)</button>
+                    </div>
+
+                    <!-- Date Selector Buttons -->
+                    <div class="date-selector-group">
+                        <button class="date-select-btn active" id="crewDateBtnToday" onclick="setFlightDate('2026-09-15')">Today (15 Sep)</button>
+                        <button class="date-select-btn" id="crewDateBtnTomorrow" onclick="setFlightDate('2026-09-16')">Tomorrow (16 Sep)</button>
+                        <button class="date-select-btn" id="crewDateBtn17" onclick="setFlightDate('2026-09-17')">17 Sep</button>
+                        <button class="date-select-btn" id="crewDateBtn18" onclick="setFlightDate('2026-09-18')">18 Sep</button>
+                        <button class="date-select-btn" id="crewDateBtn19" onclick="setFlightDate('2026-09-19')">19 Sep</button>
+                        <button class="date-select-btn" id="crewDateBtn20" onclick="setFlightDate('2026-09-20')">20 Sep</button>
+                        <button class="date-select-btn" id="crewDateBtn14" onclick="setFlightDate('2026-09-14')">14 Sep</button>
+                        <button class="date-select-btn" id="crewDateBtnAll" onclick="setFlightDate('')">All 7 Days</button>
+                    </div>
+                </div>
+
+                <!-- Standard Enterprise Filter Bar (Fleet, Hub, Search) -->
+                <div class="enterprise-filter-bar" style="border-radius:0 0 8px 8px; margin-top:1px;">
+                    <div class="filter-controls-group">
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--ink-primary);"><i class="fa-solid fa-filter"></i> Filters:</span>
+                        <select id="crewFilterFlightFleet" class="filter-select" onchange="syncCrewFlightFilters('fleet')">
+                            <option value="">Fleet: All Aircraft</option>
+                            <option value="A320">Fleet: A320 Narrowbody Jet</option>
+                            <option value="ATR72">Fleet: ATR72 Turboprop</option>
+                        </select>
+                        <select id="crewFilterFlightTail" class="filter-select" onchange="syncCrewFlightFilters('tail')">
+                            <option value="">Tail: All Aircraft</option>
+                            <option value="VT-DXA">VT-DXA (A320)</option>
+                            <option value="VT-DXB">VT-DXB (A320)</option>
+                            <option value="VT-DXC">VT-DXC (A320)</option>
+                            <option value="VT-DXD">VT-DXD (A320)</option>
+                            <option value="VT-DXE">VT-DXE (ATR72)</option>
+                            <option value="VT-DXF">VT-DXF (ATR72)</option>
+                        </select>
+                        <select id="crewFilterFlightStation" class="filter-select" onchange="syncCrewFlightFilters('station')">
+                            <option value="">Hub: All Stations</option>
+                            <option value="DEL">DEL (Delhi Hub)</option>
+                            <option value="BLR">BLR (Bengaluru Hub)</option>
+                            <option value="BOM">BOM (Mumbai)</option>
+                            <option value="CCU">CCU (Kolkata)</option>
+                            <option value="HYD">HYD (Hyderabad)</option>
+                        </select>
+                        <input type="text" id="crewFilterFlightSearch" class="filter-search-input" placeholder="Search flight #, pairing, crew..." oninput="syncCrewFlightFilters('search')">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="filter-counter-badge" id="crewFlightFilterBadge">Showing Flights</span>
+                        <button class="mode-toggle-btn" style="padding:4px 10px; font-size:0.72rem; cursor:pointer;" onclick="switchOCCView('flights')" title="Switch to Full Timeline Gantt">
+                            <i class="fa-solid fa-chart-gantt"></i> Open Timeline ↗
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3-PANE COCKPIT STAGE -->
+            <div class="cockpit-3pane-stage">
             
             <!-- PANE 1: DISRUPTION RADAR & SIMULATION POWER BUTTONS (LEFT) -->
             <section class="pane-radar-left">
@@ -2177,25 +2356,65 @@ input, select { font: inherit; color: inherit; }
                 </div>
             </section>
 
-            <!-- PANE 2: CREW OPS DESK (CENTER HERO) -->
-            <section class="pane-chat-center">
+            <!-- PANE 2: CREW OPS DESK (CENTER HERO - MINIMIZED BY DEFAULT) -->
+            <section class="pane-chat-center minimized" id="paneChatCenter">
                 <div class="chat-console-header">
-                    <h3>
-                        <i class="fa-solid fa-headset" style="color:var(--brand-green-strong)"></i>
-                        Crew Ops Recovery Desk
-                    </h3>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:0.7rem; color:var(--brand-green-strong); font-family:var(--font-mono); background:var(--brand-green-soft); padding:2px 8px; border-radius:12px; border:1px solid var(--brand-green);">
-                            ● CAR Sec 7 Deterministic Engine
+                        <h3>
+                            <i class="fa-solid fa-headset" style="color:var(--brand-green-strong)"></i>
+                            Crew Ops Copilot
+                        </h3>
+                        <span class="copilot-status-pill" id="copilotStatusPill">
+                            ● CAR Sec 7 Deterministic Engine Ready
                         </span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button class="btn-copilot-toggle" id="btnToggleCopilot" onclick="toggleChatbotMinimize()" title="Expand or Minimize Copilot Console">
+                            <i class="fa-solid fa-up-right-and-down-left-from-center" id="iconToggleCopilot"></i>
+                            <span id="labelToggleCopilot">Expand Chat</span>
+                        </button>
                         <button class="icon-btn" style="width:26px; height:26px;" onclick="clearChat()" title="Clear Console">
                             <i class="fa-solid fa-trash" style="font-size:0.7rem;"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Chat Feed -->
-                <div class="chat-feed-scroll" id="chatFeed">
+                <!-- 1. Operational Flight Wave Monitor (Visible when minimized by default) -->
+                <div class="copilot-minimized-flight-deck" id="copilotFlightDeck">
+                    <div class="wave-monitor-header">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:0.78rem; font-weight:700; color:var(--ink-primary); display:flex; align-items:center; gap:6px;">
+                                <i class="fa-solid fa-plane-tail" style="color:var(--brand-green-strong)"></i> Operational Flight Wave Monitor
+                            </span>
+                            <span class="threat-pill amber" id="waveDisruptionCountPill">3 In Disruption Review</span>
+                        </div>
+                        <span style="font-size:0.68rem; color:var(--ink-muted); font-family:var(--font-mono);" id="waveMonitorFilterLabel">
+                            Wave: All Day · Today (15 Sep)
+                        </span>
+                    </div>
+                    <div class="wave-monitor-table-wrap">
+                        <table class="data-table-main compact-wave-table">
+                            <thead>
+                                <tr>
+                                    <th>Flight</th>
+                                    <th>Sector</th>
+                                    <th>Tail</th>
+                                    <th>Block</th>
+                                    <th>Assigned PIC</th>
+                                    <th>Assigned FO</th>
+                                    <th>Status</th>
+                                    <th>OCC Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="waveMonitorTbody">
+                                <!-- Populated dynamically based on top flight filters -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. Chat Feed (Hidden when minimized, visible when expanded) -->
+                <div class="chat-feed-scroll" id="chatFeed" style="display:none;">
                     <!-- Welcome Turn -->
                     <div class="advisor-card-rich">
                         <div class="advisor-top-verdict">
@@ -2221,9 +2440,9 @@ input, select { font: inherit; color: inherit; }
                 </div>
 
                 <!-- Prompt Input Bar with Query Builder & Suggestion Chips -->
-                <div class="chat-prompt-wrap">
-                    <!-- Enterprise Disruption Filter & Crew Search Bar -->
-                    <div class="chat-query-builder">
+                <div class="chat-prompt-wrap" id="chatPromptWrap">
+                    <!-- Enterprise Disruption Filter & Crew Search Bar (Hidden when minimized, visible when expanded) -->
+                    <div class="chat-query-builder" id="chatQueryBuilder" style="display:none;">
                         <span class="builder-label"><i class="fa-solid fa-sliders"></i> Disruption Filter:</span>
                         <select id="qbFleet" class="qb-select" onchange="onQueryBuilderFilterChange()">
                             <option value="">Fleet: All</option>
@@ -2404,6 +2623,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ</div>
                 </div>
             </section>
 
+            </div><!-- /cockpit-3pane-stage -->
         </main>
 
         <!-- ==========================================================================
@@ -2773,6 +2993,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ</div>
         await loadInitialData();
         // Initial binding to recommended pilot C-3310
         bindCandidateToRightPane('C-3310');
+        renderCrewOpsWaveMonitor();
     });
 
     // 1. Theme Engine (frontend-next Light/Dark Theme)
@@ -2811,7 +3032,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ</div>
             if (btn) btn.classList.toggle('active', t === view);
             if (pane) {
                 if (t === 'console') {
-                    pane.style.display = view === 'console' ? 'grid' : 'none';
+                    pane.style.display = view === 'console' ? 'flex' : 'none';
                 } else {
                     pane.classList.toggle('active', t === view);
                 }
@@ -2898,6 +3119,11 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ</div>
         const input = document.getElementById('chatQueryInput');
         const question = input.value.trim();
         if (!question) return;
+
+        // Auto-expand copilot chat if currently minimized
+        if (STATE.chatMinimized) {
+            toggleChatbotMinimize(false);
+        }
         input.value = '';
 
         const feed = document.getElementById('chatFeed');
@@ -3436,6 +3662,9 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
     // 7. Scenario Triggers
     async function triggerScenario(id) {
         switchOCCView('console');
+        if (STATE.chatMinimized) {
+            toggleChatbotMinimize(false);
+        }
         try {
             await fetch('/api/whatif', {
                 method: 'POST',
@@ -3538,6 +3767,207 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
         b6: { label: 'Block 6', startMin: 1080, endMin: 1440, ticks: ['18:00', '19:00', '20:00', '21:00', '22:00', '23:00'] }
     };
 
+    
+    // ==========================================================================
+    // CHATBOT MINIMIZE / EXPAND CONTROLS & FLIGHT FILTERS SYNC
+    // ==========================================================================
+    STATE.chatMinimized = true; // Minimized by default as requested
+
+    function toggleChatbotMinimize(forceState) {
+        if (forceState !== undefined) {
+            STATE.chatMinimized = forceState;
+        } else {
+            STATE.chatMinimized = !STATE.chatMinimized;
+        }
+
+        const pane = document.getElementById('paneChatCenter');
+        const deck = document.getElementById('copilotFlightDeck');
+        const feed = document.getElementById('chatFeed');
+        const qb = document.getElementById('chatQueryBuilder');
+        const icon = document.getElementById('iconToggleCopilot');
+        const lbl = document.getElementById('labelToggleCopilot');
+        const pill = document.getElementById('copilotStatusPill');
+
+        if (STATE.chatMinimized) {
+            if (pane) {
+                pane.classList.add('minimized');
+                pane.classList.remove('expanded');
+            }
+            if (deck) deck.style.display = 'flex';
+            if (feed) feed.style.display = 'none';
+            if (qb) qb.style.display = 'none';
+            if (icon) icon.className = 'fa-solid fa-up-right-and-down-left-from-center';
+            if (lbl) lbl.textContent = 'Expand Chat';
+            if (pill) pill.innerHTML = '● CAR Sec 7 Deterministic Engine Ready';
+            renderCrewOpsWaveMonitor();
+        } else {
+            if (pane) {
+                pane.classList.remove('minimized');
+                pane.classList.add('expanded');
+            }
+            if (deck) deck.style.display = 'none';
+            if (feed) feed.style.display = 'flex';
+            if (qb) qb.style.display = 'flex';
+            if (icon) icon.className = 'fa-solid fa-down-left-and-up-right-to-center';
+            if (lbl) lbl.textContent = 'Minimize Chat';
+            if (pill) pill.innerHTML = '● Copilot Active · CAR Sec 7 Solver Running';
+            if (feed) feed.scrollTop = feed.scrollHeight;
+        }
+    }
+
+    // Synchronize filters between Crew Ops page and Flight Timeline tab
+    function syncCrewFlightFilters(field) {
+        const crewFleet = document.getElementById('crewFilterFlightFleet')?.value || '';
+        const crewTail = document.getElementById('crewFilterFlightTail')?.value || '';
+        const crewStation = document.getElementById('crewFilterFlightStation')?.value || '';
+        const crewSearch = document.getElementById('crewFilterFlightSearch')?.value || '';
+
+        // Mirror to timeline filters
+        const tFleet = document.getElementById('filterFlightFleet');
+        const tTail = document.getElementById('filterFlightTail');
+        const tStation = document.getElementById('filterFlightStation');
+        const tSearch = document.getElementById('filterFlightSearch');
+
+        if (tFleet && tFleet.value !== crewFleet) tFleet.value = crewFleet;
+        if (tTail && tTail.value !== crewTail) tTail.value = crewTail;
+        if (tStation && tStation.value !== crewStation) tStation.value = crewStation;
+        if (tSearch && tSearch.value !== crewSearch) tSearch.value = crewSearch;
+
+        renderFlightsView();
+        renderCrewOpsWaveMonitor();
+    }
+
+    function renderCrewOpsWaveMonitor() {
+        const tbody = document.getElementById('waveMonitorTbody');
+        if (!tbody) return;
+
+        const fleetVal = document.getElementById('crewFilterFlightFleet')?.value || '';
+        const tailVal = document.getElementById('crewFilterFlightTail')?.value || '';
+        const stationVal = document.getElementById('crewFilterFlightStation')?.value || '';
+        const dateVal = STATE.activeFlightDate;
+        const searchVal = (document.getElementById('crewFilterFlightSearch')?.value || '').toLowerCase().trim();
+        const blk = SHIFT_BLOCKS[STATE.activeShiftBlock] || SHIFT_BLOCKS.all;
+
+        let list = STATE.flights.length > 0 ? STATE.flights : [];
+
+        // Apply filters
+        if (fleetVal) list = list.filter(f => (f.aircraft_type || 'A320') === fleetVal);
+        if (tailVal) list = list.filter(f => (f.aircraft || f.aircraft_tail || 'VT-DXA') === tailVal);
+        if (stationVal) list = list.filter(f => ((f.dep_station || f.origin) === stationVal || (f.arr_station || f.destination) === stationVal));
+        if (dateVal) list = list.filter(f => (f.date === dateVal || (f.dep_utc && f.dep_utc.startsWith(dateVal))));
+        if (searchVal) {
+            list = list.filter(f => 
+                (f.flight_no || f.flight_number || '').toLowerCase().includes(searchVal) ||
+                (f.pairing_id || '').toLowerCase().includes(searchVal) ||
+                (f.captain || f.captain_id || '').toLowerCase().includes(searchVal) ||
+                (f.first_officer || f.first_officer_id || '').toLowerCase().includes(searchVal)
+            );
+        }
+
+        // Apply shift wave block
+        if (STATE.activeShiftBlock && STATE.activeShiftBlock !== 'all') {
+            list = list.filter(f => {
+                let depMin = f.dep_min !== undefined ? f.dep_min : (parseInt(f.dep_utc.substring(11, 13)) * 60 + parseInt(f.dep_utc.substring(14, 16)));
+                return depMin >= blk.startMin && depMin < blk.endMin;
+            });
+        }
+
+        // Update count badge
+        const badge = document.getElementById('crewFlightFilterBadge');
+        if (badge) {
+            const dateLabel = dateVal ? `on ${dateVal}` : 'all 7 days';
+            badge.textContent = `Showing ${list.length} Flights (${dateLabel})`;
+        }
+
+        // Update wave monitor label
+        const waveLbl = document.getElementById('waveMonitorFilterLabel');
+        if (waveLbl) {
+            const dateDesc = dateVal === '2026-09-15' ? 'Today (15 Sep)' : (dateVal || 'All Dates');
+            waveLbl.textContent = `Wave: ${blk.label} · ${dateDesc}`;
+        }
+
+        // Disruption identification
+        const disruptedFlights = list.filter(f => {
+            const fltNo = f.flight_no || f.flight_number || '';
+            return fltNo === 'DX412' || fltNo === 'DX421' || (f.date === '2026-09-17' && (f.dep_station === 'BLR' || f.arr_station === 'BLR'));
+        });
+
+        const countPill = document.getElementById('waveDisruptionCountPill');
+        if (countPill) {
+            if (disruptedFlights.length > 0) {
+                countPill.className = 'threat-pill red';
+                countPill.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${disruptedFlights.length} In Disruption Review`;
+            } else {
+                countPill.className = 'threat-pill green';
+                countPill.innerHTML = `<i class="fa-solid fa-circle-check"></i> All ${list.length} Covered`;
+            }
+        }
+
+        if (list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--ink-muted);">No flights match the active filters in this wave block.</td></tr>`;
+            return;
+        }
+
+        const displayList = list.slice(0, 35);
+        tbody.innerHTML = displayList.map(f => {
+            const fltNo = f.flight_no || f.flight_number || 'DX---';
+            const sector = `${f.dep_station || f.origin} → ${f.arr_station || f.destination}`;
+            const tail = f.aircraft || f.aircraft_tail || 'VT-DXA';
+            const depTime = (f.dep_utc || '').substring(11, 16) || '07:00';
+            const arrTime = (f.arr_utc || '').substring(11, 16) || '08:45';
+            const block = `${depTime} - ${arrTime}Z`;
+            const capt = f.captain || f.captain_id || 'C-1042';
+            const fo = f.first_officer || f.first_officer_id || 'C-2087';
+            const pairingId = f.pairing_id || 'P-2291';
+
+            let statusBadge = '';
+            let rowClass = 'interactive-row';
+            let actionBtn = '';
+
+            if (fltNo === 'DX412') {
+                rowClass += ' disrupted-row';
+                statusBadge = '<span class="threat-pill red"><i class="fa-solid fa-bed-pulse"></i> Sick C-1042</span>';
+                actionBtn = `<button class="btn-authorize-action primary-large" style="margin:0; padding:2px 8px; font-size:0.68rem;" onclick="event.stopPropagation(); onSelectUncrewedRoute('P-2291', 'DX412', 'C-1042');"><i class="fa-solid fa-bolt"></i> Callout</button>`;
+            } else if (fltNo === 'DX421') {
+                rowClass += ' disrupted-row';
+                statusBadge = '<span class="threat-pill amber"><i class="fa-solid fa-clock"></i> 60h Cap</span>';
+                actionBtn = `<button class="btn-authorize-action" style="margin:0; padding:2px 8px; font-size:0.68rem;" onclick="event.stopPropagation(); onSelectUncrewedRoute('P-2287', 'DX421', 'C-2087');"><i class="fa-solid fa-bolt"></i> Swap</button>`;
+            } else if (f.date === '2026-09-17' && (f.dep_station === 'BLR' || f.arr_station === 'BLR')) {
+                rowClass += ' disrupted-row';
+                statusBadge = '<span class="threat-pill red"><i class="fa-solid fa-ban"></i> Ground Stop</span>';
+                actionBtn = `<button class="btn-authorize-action" style="margin:0; padding:2px 8px; font-size:0.68rem;" onclick="event.stopPropagation(); submitCustomPrompt('BLR is closed 08:00 to 14:00 on 2026-09-17 - what is the crew impact?');"><i class="fa-solid fa-bolt"></i> Impact</button>`;
+            } else {
+                statusBadge = '<span class="threat-pill green"><i class="fa-solid fa-circle-check"></i> Covered</span>';
+                actionBtn = `<button class="btn-copilot-toggle" style="margin:0; padding:2px 8px; font-size:0.68rem;" onclick="event.stopPropagation(); selectFlightForCockpit('${fltNo}', '${pairingId}', '${tail}', '${capt}');"><i class="fa-solid fa-eye"></i> View</button>`;
+            }
+
+            return `
+                <tr class="${rowClass}" onclick="selectFlightForCockpit('${fltNo}', '${pairingId}', '${tail}', '${capt}')">
+                    <td><strong style="color:var(--ink-primary); font-family:var(--font-mono);">${fltNo}</strong></td>
+                    <td><span class="route-tag" style="padding:1px 5px; font-size:0.68rem;">${sector}</span></td>
+                    <td><span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--ink-secondary);">${tail}</span></td>
+                    <td><span style="font-family:var(--font-mono); font-size:0.7rem;">${block}</span></td>
+                    <td><span style="font-weight:600; color:var(--ink-primary);">${capt}</span></td>
+                    <td><span style="color:var(--ink-secondary);">${fo}</span></td>
+                    <td>${statusBadge}</td>
+                    <td>${actionBtn}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function selectFlightForCockpit(fltNo, pairingId, tail, capt) {
+        const metaPairing = document.getElementById('dispMetaPairing');
+        const metaLegs = document.getElementById('dispMetaLegs');
+        if (metaPairing) metaPairing.textContent = `${pairingId} (Active)`;
+        if (metaLegs) metaLegs.textContent = `${fltNo} (${tail})`;
+
+        const isA320 = tail.includes('DXA') || tail.includes('DXB') || tail.includes('DXC') || tail.includes('DXD');
+        const candidateId = isA320 ? 'C-3310' : 'C-3305';
+        bindCandidateToRightPane(candidateId);
+        showToast(`Loaded ${fltNo} [${pairingId}] into Risk Radar & Dispatch Deck`);
+    }
+
     function setFlightViewMode(mode) {
         STATE.flightViewMode = mode;
         const btnTime = document.getElementById('btnModeTimeline');
@@ -3558,37 +3988,55 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
         const pills = document.querySelectorAll('.shift-block-pill');
         pills.forEach(p => {
             const id = p.id;
-            const match = (block === 'all' && id === 'pillBlockAll') ||
-                          (block === 'b1' && id === 'pillBlock1') ||
-                          (block === 'b2' && id === 'pillBlock2') ||
-                          (block === 'b3' && id === 'pillBlock3') ||
-                          (block === 'b4' && id === 'pillBlock4') ||
-                          (block === 'b5' && id === 'pillBlock5') ||
-                          (block === 'b6' && id === 'pillBlock6');
+            const match = (block === 'all' && (id === 'pillBlockAll' || id === 'crewPillBlockAll')) ||
+                          (block === 'b1' && (id === 'pillBlock1' || id === 'crewPillBlock1')) ||
+                          (block === 'b2' && (id === 'pillBlock2' || id === 'crewPillBlock2')) ||
+                          (block === 'b3' && (id === 'pillBlock3' || id === 'crewPillBlock3')) ||
+                          (block === 'b4' && (id === 'pillBlock4' || id === 'crewPillBlock4')) ||
+                          (block === 'b5' && (id === 'pillBlock5' || id === 'crewPillBlock5')) ||
+                          (block === 'b6' && (id === 'pillBlock6' || id === 'crewPillBlock6'));
             p.classList.toggle('active', match);
         });
         renderFlightsView();
+        renderCrewOpsWaveMonitor();
     }
 
     function setFlightDate(dateStr) {
         STATE.activeFlightDate = dateStr;
         const dateBtns = document.querySelectorAll('.date-select-btn');
         dateBtns.forEach(b => {
-            const isMatch = (dateStr === '2026-09-15' && b.id === 'dateBtnToday') ||
-                            (dateStr === '2026-09-16' && b.id === 'dateBtnTomorrow') ||
-                            (dateStr === '2026-09-17' && b.id === 'dateBtn17') ||
-                            (dateStr === '2026-09-18' && b.id === 'dateBtn18') ||
-                            (dateStr === '2026-09-19' && b.id === 'dateBtn19') ||
-                            (dateStr === '2026-09-20' && b.id === 'dateBtn20') ||
-                            (dateStr === '2026-09-14' && b.id === 'dateBtn14') ||
-                            (dateStr === '' && b.id === 'dateBtnAll');
+            const isMatch = (dateStr === '2026-09-15' && (b.id === 'dateBtnToday' || b.id === 'crewDateBtnToday')) ||
+                            (dateStr === '2026-09-16' && (b.id === 'dateBtnTomorrow' || b.id === 'crewDateBtnTomorrow')) ||
+                            (dateStr === '2026-09-17' && (b.id === 'dateBtn17' || b.id === 'crewDateBtn17')) ||
+                            (dateStr === '2026-09-18' && (b.id === 'dateBtn18' || b.id === 'crewDateBtn18')) ||
+                            (dateStr === '2026-09-19' && (b.id === 'dateBtn19' || b.id === 'crewDateBtn19')) ||
+                            (dateStr === '2026-09-20' && (b.id === 'dateBtn20' || b.id === 'crewDateBtn20')) ||
+                            (dateStr === '2026-09-14' && (b.id === 'dateBtn14' || b.id === 'crewDateBtn14')) ||
+                            (dateStr === '' && (b.id === 'dateBtnAll' || b.id === 'crewDateBtnAll'));
             b.classList.toggle('active', isMatch);
         });
         renderFlightsView();
+        renderCrewOpsWaveMonitor();
     }
 
     function applyFlightFilters() {
+        const tFleet = document.getElementById('filterFlightFleet')?.value || '';
+        const tTail = document.getElementById('filterFlightTail')?.value || '';
+        const tStation = document.getElementById('filterFlightStation')?.value || '';
+        const tSearch = document.getElementById('filterFlightSearch')?.value || '';
+
+        const crewFleet = document.getElementById('crewFilterFlightFleet');
+        const crewTail = document.getElementById('crewFilterFlightTail');
+        const crewStation = document.getElementById('crewFilterFlightStation');
+        const crewSearch = document.getElementById('crewFilterFlightSearch');
+
+        if (crewFleet && crewFleet.value !== tFleet) crewFleet.value = tFleet;
+        if (crewTail && crewTail.value !== tTail) crewTail.value = tTail;
+        if (crewStation && crewStation.value !== tStation) crewStation.value = tStation;
+        if (crewSearch && crewSearch.value !== tSearch) crewSearch.value = tSearch;
+
         renderFlightsView();
+        renderCrewOpsWaveMonitor();
     }
 
     function filterFlightsTable() {
