@@ -528,6 +528,15 @@ input, select { font: inherit; color: inherit; }
     background: var(--surface-1);
 }
 
+.pane-chat-center.minimized .suggestion-chips-row,
+.pane-chat-center.minimized .chat-query-builder {
+    display: none !important;
+}
+
+.pane-chat-center.expanded .suggestion-chips-row {
+    display: flex;
+}
+
 .wave-monitor-header {
     display: flex;
     align-items: center;
@@ -2748,7 +2757,7 @@ input, select { font: inherit; color: inherit; }
                             <span style="font-size:0.78rem; font-weight:700; color:var(--ink-primary); display:flex; align-items:center; gap:6px;">
                                 <i class="fa-solid fa-plane-tail" style="color:var(--brand-green-strong)"></i> Operational Flight Wave Monitor
                             </span>
-                            <span class="threat-pill amber" id="waveDisruptionCountPill">3 In Disruption Review</span>
+                            <span class="threat-pill red" id="waveDisruptionCountPill"><i class="fa-solid fa-triangle-exclamation"></i> 3 Uncrewed</span>
                         </div>
                         <span style="font-size:0.68rem; color:var(--ink-muted); font-family:var(--font-mono);" id="waveMonitorFilterLabel">
                             Wave: All Day · Today (15 Sep)
@@ -2831,8 +2840,8 @@ input, select { font: inherit; color: inherit; }
                         </button>
                     </div>
 
-                    <!-- Quick Suggestion Chips -->
-                    <div class="suggestion-chips-row">
+                    <!-- Quick Suggestion Chips (Visible only when Crew Advisor window is open) -->
+                    <div class="suggestion-chips-row" id="suggestionChipsRow" style="display:none;">
                         <span style="font-size:0.68rem; color:var(--ink-muted); font-weight:700; text-transform:uppercase;">Try:</span>
                         <button class="sugg-chip-btn" onclick="submitCustomPrompt('C-1042 called in sick for tomorrow. What should I do?')">
                             C-1042 sick for tomorrow
@@ -3995,8 +4004,9 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
         if (revBtn) revBtn.innerHTML = `Review <span class="counter-num">2</span>`;
         if (doneBtn) doneBtn.innerHTML = `Done <span class="counter-num" style="background:rgba(16, 185, 129, 0.2); color:#10b981;">2</span>`;
 
-        // Refresh flight views (timeline will now show covered teal bar for DX412!)
+        // Refresh flight views (timeline and wave monitor will now show covered for DX412!)
         renderFlightsView();
+        renderCrewOpsWaveMonitor();
     }
 
     // 7. Scenario Triggers
@@ -4035,9 +4045,12 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({session: STATE.session})
             });
+            STATE.s1Covered = false;
             showToast('Schedule baseline reset to 2026-09-14 18:00Z.');
             clearChat();
             bindCandidateToRightPane('C-3310');
+            renderFlightsView();
+            renderCrewOpsWaveMonitor();
         } catch (e) {
             console.error('Reset error', e);
         }
@@ -4246,6 +4259,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
         const deck = document.getElementById('copilotFlightDeck');
         const feed = document.getElementById('chatFeed');
         const qb = document.getElementById('chatQueryBuilder');
+        const sugg = document.getElementById('suggestionChipsRow');
         const icon = document.getElementById('iconToggleCopilot');
         const lbl = document.getElementById('labelToggleCopilot');
         const pill = document.getElementById('copilotStatusPill');
@@ -4258,6 +4272,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
             if (deck) deck.style.display = 'flex';
             if (feed) feed.style.display = 'none';
             if (qb) qb.style.display = 'none';
+            if (sugg) sugg.style.display = 'none';
             if (icon) icon.className = 'fa-solid fa-comments';
             if (lbl) lbl.textContent = 'Open Crew Advisor';
             if (pill) pill.innerHTML = '● CAR Sec 7 Deterministic Engine Ready';
@@ -4270,6 +4285,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
             if (deck) deck.style.display = 'none';
             if (feed) feed.style.display = 'flex';
             if (qb) qb.style.display = 'flex';
+            if (sugg) sugg.style.display = 'flex';
             if (icon) icon.className = 'fa-solid fa-chart-gantt';
             if (lbl) lbl.textContent = 'Show Flight Monitor';
             if (pill) pill.innerHTML = '● Crew Advisor Active · CAR Sec 7 Solver Running';
@@ -4351,14 +4367,14 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
         // Disruption identification
         const disruptedFlights = list.filter(f => {
             const fltNo = f.flight_no || f.flight_number || '';
-            return fltNo === 'DX412' || fltNo === 'DX421' || (f.date === '2026-09-17' && (f.dep_station === 'BLR' || f.arr_station === 'BLR'));
+            return (fltNo === 'DX412' && !STATE.s1Covered) || fltNo === 'DX421' || (f.date === '2026-09-17' && (f.dep_station === 'BLR' || f.arr_station === 'BLR'));
         });
 
         const countPill = document.getElementById('waveDisruptionCountPill');
         if (countPill) {
             if (disruptedFlights.length > 0) {
                 countPill.className = 'threat-pill red';
-                countPill.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${disruptedFlights.length} In Disruption Review`;
+                countPill.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${disruptedFlights.length} Uncrewed`;
             } else {
                 countPill.className = 'threat-pill green';
                 countPill.innerHTML = `<i class="fa-solid fa-circle-check"></i> All ${list.length} Covered`;
@@ -4382,25 +4398,31 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
             const fo = f.first_officer || f.first_officer_id || 'C-2087';
             const pairingId = f.pairing_id || 'P-2291';
 
+            let isUncrewed = false;
+            let actionHandler = '';
+
+            if (fltNo === 'DX412' && !STATE.s1Covered) {
+                isUncrewed = true;
+                actionHandler = `onSelectUncrewedRoute('P-2291', 'DX412', 'C-1042');`;
+            } else if (fltNo === 'DX421') {
+                isUncrewed = true;
+                actionHandler = `onSelectUncrewedRoute('P-2287', 'DX421', 'C-2087');`;
+            } else if (f.date === '2026-09-17' && (f.dep_station === 'BLR' || f.arr_station === 'BLR')) {
+                isUncrewed = true;
+                actionHandler = `submitCustomPrompt('BLR is closed 08:00 to 14:00 on 2026-09-17 - what is the crew impact?');`;
+            }
+
             let statusBadge = '';
             let rowClass = 'interactive-row';
             let actionBtn = '';
 
-            if (fltNo === 'DX412') {
+            if (isUncrewed) {
                 rowClass += ' disrupted-row';
-                statusBadge = '<span class="threat-pill red"><i class="fa-solid fa-bed-pulse"></i> Sick C-1042</span>';
-                actionBtn = `<button class="btn-authorize-action primary-large" style="margin:0; padding:2px 8px; font-size:0.68rem;" onclick="event.stopPropagation(); onSelectUncrewedRoute('P-2291', 'DX412', 'C-1042');"><i class="fa-solid fa-bolt"></i> Callout</button>`;
-            } else if (fltNo === 'DX421') {
-                rowClass += ' disrupted-row';
-                statusBadge = '<span class="threat-pill amber"><i class="fa-solid fa-clock"></i> 60h Cap</span>';
-                actionBtn = `<button class="btn-authorize-action" style="margin:0; padding:2px 8px; font-size:0.68rem;" onclick="event.stopPropagation(); onSelectUncrewedRoute('P-2287', 'DX421', 'C-2087');"><i class="fa-solid fa-bolt"></i> Swap</button>`;
-            } else if (f.date === '2026-09-17' && (f.dep_station === 'BLR' || f.arr_station === 'BLR')) {
-                rowClass += ' disrupted-row';
-                statusBadge = '<span class="threat-pill red"><i class="fa-solid fa-ban"></i> Ground Stop</span>';
-                actionBtn = `<button class="btn-authorize-action" style="margin:0; padding:2px 8px; font-size:0.68rem;" onclick="event.stopPropagation(); submitCustomPrompt('BLR is closed 08:00 to 14:00 on 2026-09-17 - what is the crew impact?');"><i class="fa-solid fa-bolt"></i> Impact</button>`;
+                statusBadge = '<span class="threat-pill red"><i class="fa-solid fa-triangle-exclamation"></i> Uncrewed</span>';
+                actionBtn = `<button class="btn-authorize-action primary-large" style="margin:0; padding:3px 10px; font-size:0.7rem; font-weight:700;" onclick="event.stopPropagation(); ${actionHandler}"><i class="fa-solid fa-bolt"></i> Action</button>`;
             } else {
                 statusBadge = '<span class="threat-pill green"><i class="fa-solid fa-circle-check"></i> Covered</span>';
-                actionBtn = `<button class="btn-copilot-toggle" style="margin:0; padding:2px 8px; font-size:0.68rem;" onclick="event.stopPropagation(); selectFlightForCockpit('${fltNo}', '${pairingId}', '${tail}', '${capt}');"><i class="fa-solid fa-eye"></i> View</button>`;
+                actionBtn = '<span style="color:var(--ink-muted); font-size:0.75rem;">—</span>';
             }
 
             return `
@@ -4412,7 +4434,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
                     <td><span style="font-weight:600; color:var(--ink-primary);">${capt}</span></td>
                     <td><span style="color:var(--ink-secondary);">${fo}</span></td>
                     <td>${statusBadge}</td>
-                    <td>${actionBtn}</td>
+                    <td style="text-align:center;">${actionBtn}</td>
                 </tr>
             `;
         }).join('');
@@ -4673,7 +4695,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
                     </td>
                     <td>
                         <span class="threat-pill ${isDisrupted ? 'red' : 'green'}" style="cursor:pointer;" onclick="openFlightModal('${f.flight_id || fltNo}')">
-                            ${isDisrupted ? 'Uncrewed' : 'Scheduled'}
+                            <i class="fa-solid ${isDisrupted ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> ${isDisrupted ? 'Uncrewed' : 'Covered'}
                         </span>
                     </td>
                 </tr>
@@ -4693,7 +4715,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
         if (modalTitle) {
             modalTitle.innerHTML = `
                 Flight ${fltNo} · ${f.dep_station} → ${f.arr_station} 
-                ${isDisrupted ? '<span class="threat-pill red" style="margin-left:8px; font-size:0.7rem;">DISRUPTED / UNCREWED</span>' : '<span class="threat-pill green" style="margin-left:8px; font-size:0.7rem;">SCHEDULED</span>'}
+                ${isDisrupted ? '<span class="threat-pill red" style="margin-left:8px; font-size:0.7rem;"><i class="fa-solid fa-triangle-exclamation"></i> UNCREWED</span>' : '<span class="threat-pill green" style="margin-left:8px; font-size:0.7rem;"><i class="fa-solid fa-circle-check"></i> COVERED</span>'}
             `;
         }
 
