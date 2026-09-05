@@ -448,12 +448,13 @@ input, select { font: inherit; color: inherit; }
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: 350px 1fr 420px;
+    grid-template-columns: 48px 1fr 420px;
     gap: 1rem;
-    padding: 1rem 1.5rem;
+    padding: 10px 24px 16px 24px;
     overflow: hidden;
     position: relative;
     z-index: 1;
+    transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 
@@ -466,6 +467,18 @@ input, select { font: inherit; color: inherit; }
     overflow: hidden;
     position: relative;
     z-index: 1;
+}
+
+
+.crewops-single-filter-bar {
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
 }
 
 .crewops-filter-bar-wrapper {
@@ -572,6 +585,157 @@ input, select { font: inherit; color: inherit; }
 /* ==========================================================================
    LEFT SIDEBAR NAVIGATION BAR STYLES
    ========================================================================== */
+
+.cockpit-3pane-stage.ops-nav-open {
+    grid-template-columns: 350px 1fr 420px;
+}
+
+/* Ops Navigator Collapsed Rail (Left Dock) */
+.ops-nav-collapsed-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 10px 4px;
+    cursor: pointer;
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s ease;
+    user-select: none;
+    overflow: hidden;
+}
+
+.ops-nav-collapsed-rail:hover {
+    background: var(--surface-2);
+    border-color: var(--brand-green);
+    box-shadow: 0 4px 16px rgba(0, 131, 108, 0.18);
+}
+
+.ops-rail-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    color: var(--brand-green-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.ops-rail-btn:hover {
+    background: var(--brand-green-soft);
+    border-color: var(--brand-green);
+}
+
+.rail-icon-cluster {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.rail-threat-pill {
+    padding: 1px 5px;
+    font-size: 0.6rem;
+    font-weight: 800;
+}
+
+.rail-vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-family: var(--font-header);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: var(--ink-secondary);
+    white-space: nowrap;
+    margin: 18px 0;
+}
+
+.rail-bottom-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.rail-mini-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    transition: all 0.15s;
+}
+
+.rail-mini-icon:hover {
+    background: var(--surface-3);
+    border-color: var(--brand-green);
+}
+
+/* Header Lock & Minimize Buttons */
+.snav-lock-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    color: var(--ink-secondary);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.snav-lock-btn:hover {
+    background: var(--surface-3);
+    color: var(--ink-primary);
+}
+
+.snav-lock-btn.locked {
+    background: var(--brand-green-soft);
+    color: var(--brand-green-strong);
+    border-color: var(--brand-green);
+}
+
+.snav-minimize-btn {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    color: var(--ink-secondary);
+    font-size: 0.72rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.snav-minimize-btn:hover {
+    background: var(--surface-3);
+    color: var(--status-critical);
+    border-color: var(--status-critical);
+}
+
 .sidebar-nav-header-box {
     background: var(--surface-1);
     border: 1px solid var(--hairline);
@@ -2258,45 +2422,47 @@ input, select { font: inherit; color: inherit; }
            MAIN OCC COCKPIT VIEW (WITH TOP FLIGHT FILTERS & 3-PANE STAGE)
            ========================================================================== -->
         <main id="viewConsolePane" class="cockpit-console-container">
-            <!-- Top Flight Filters Ribbon for Crew Ops Page -->
+            <!-- Top Flight Filters Ribbon for Crew Ops Page (Single Streamlined Row) -->
             <div class="crewops-filter-bar-wrapper">
-                <div class="flight-view-top-ribbon" style="border-radius:8px 8px 0 0; margin-bottom:0;">
-                    <!-- Operational Shift Time Blocks (Wave Slicing) -->
-                    <div class="shift-blocks-group">
-                        <span class="block-group-label"><i class="fa-solid fa-clock"></i> Shift Waves:</span>
-                        <button class="shift-block-pill active" id="crewPillBlockAll" onclick="setShiftBlock('all')">All Day</button>
-                        <button class="shift-block-pill" id="crewPillBlock1" onclick="setShiftBlock('b1')">Block 1 (00:00-05:59)</button>
-                        <button class="shift-block-pill" id="crewPillBlock2" onclick="setShiftBlock('b2')">Block 2 (06:00-08:59)</button>
-                        <button class="shift-block-pill" id="crewPillBlock3" onclick="setShiftBlock('b3')">Block 3 (09:00-11:59)</button>
-                        <button class="shift-block-pill" id="crewPillBlock4" onclick="setShiftBlock('b4')">Block 4 (12:00-14:59)</button>
-                        <button class="shift-block-pill" id="crewPillBlock5" onclick="setShiftBlock('b5')">Block 5 (15:00-17:59)</button>
-                        <button class="shift-block-pill" id="crewPillBlock6" onclick="setShiftBlock('b6')">Block 6 (18:00-23:59)</button>
-                    </div>
+                <div class="enterprise-filter-bar crewops-single-filter-bar">
+                    <div class="filter-controls-group" style="gap:8px;">
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--ink-primary); display:flex; align-items:center; gap:5px;">
+                            <i class="fa-solid fa-filter"></i> Filters:
+                        </span>
 
-                    <!-- Date Selector Buttons -->
-                    <div class="date-selector-group">
-                        <button class="date-select-btn active" id="crewDateBtnToday" onclick="setFlightDate('2026-09-15')">Today (15 Sep)</button>
-                        <button class="date-select-btn" id="crewDateBtnTomorrow" onclick="setFlightDate('2026-09-16')">Tomorrow (16 Sep)</button>
-                        <button class="date-select-btn" id="crewDateBtn17" onclick="setFlightDate('2026-09-17')">17 Sep</button>
-                        <button class="date-select-btn" id="crewDateBtn18" onclick="setFlightDate('2026-09-18')">18 Sep</button>
-                        <button class="date-select-btn" id="crewDateBtn19" onclick="setFlightDate('2026-09-19')">19 Sep</button>
-                        <button class="date-select-btn" id="crewDateBtn20" onclick="setFlightDate('2026-09-20')">20 Sep</button>
-                        <button class="date-select-btn" id="crewDateBtn14" onclick="setFlightDate('2026-09-14')">14 Sep</button>
-                        <button class="date-select-btn" id="crewDateBtnAll" onclick="setFlightDate('')">All 7 Days</button>
-                    </div>
-                </div>
+                        <!-- Date Dropdown -->
+                        <select id="crewFilterDate" class="filter-select" onchange="setFlightDate(this.value)">
+                            <option value="2026-09-15" selected>Date: Today (15 Sep)</option>
+                            <option value="2026-09-16">Date: Tomorrow (16 Sep)</option>
+                            <option value="2026-09-17">Date: 17 Sep</option>
+                            <option value="2026-09-18">Date: 18 Sep</option>
+                            <option value="2026-09-19">Date: 19 Sep</option>
+                            <option value="2026-09-20">Date: 20 Sep</option>
+                            <option value="2026-09-14">Date: 14 Sep</option>
+                            <option value="">Date: All 7 Days</option>
+                        </select>
 
-                <!-- Standard Enterprise Filter Bar (Fleet, Hub, Search) -->
-                <div class="enterprise-filter-bar" style="border-radius:0 0 8px 8px; margin-top:1px;">
-                    <div class="filter-controls-group">
-                        <span style="font-size:0.75rem; font-weight:700; color:var(--ink-primary);"><i class="fa-solid fa-filter"></i> Filters:</span>
+                        <!-- Shift Block / Wave Dropdown (As Requested!) -->
+                        <select id="crewFilterShiftBlock" class="filter-select" onchange="setShiftBlock(this.value)">
+                            <option value="all" selected>Wave: All Day (24h)</option>
+                            <option value="b1">Wave: Block 1 (00:00 - 05:59)</option>
+                            <option value="b2">Wave: Block 2 (06:00 - 08:59)</option>
+                            <option value="b3">Wave: Block 3 (09:00 - 11:59)</option>
+                            <option value="b4">Wave: Block 4 (12:00 - 14:59)</option>
+                            <option value="b5">Wave: Block 5 (15:00 - 17:59)</option>
+                            <option value="b6">Wave: Block 6 (18:00 - 23:59)</option>
+                        </select>
+
+                        <!-- Fleet Dropdown -->
                         <select id="crewFilterFlightFleet" class="filter-select" onchange="syncCrewFlightFilters('fleet')">
-                            <option value="">Fleet: All Aircraft</option>
-                            <option value="A320">Fleet: A320 Narrowbody Jet</option>
+                            <option value="">Fleet: All</option>
+                            <option value="A320">Fleet: A320 Jet</option>
                             <option value="ATR72">Fleet: ATR72 Turboprop</option>
                         </select>
+
+                        <!-- Tail Dropdown -->
                         <select id="crewFilterFlightTail" class="filter-select" onchange="syncCrewFlightFilters('tail')">
-                            <option value="">Tail: All Aircraft</option>
+                            <option value="">Tail: All Tails</option>
                             <option value="VT-DXA">VT-DXA (A320)</option>
                             <option value="VT-DXB">VT-DXB (A320)</option>
                             <option value="VT-DXC">VT-DXC (A320)</option>
@@ -2304,6 +2470,8 @@ input, select { font: inherit; color: inherit; }
                             <option value="VT-DXE">VT-DXE (ATR72)</option>
                             <option value="VT-DXF">VT-DXF (ATR72)</option>
                         </select>
+
+                        <!-- Station Dropdown -->
                         <select id="crewFilterFlightStation" class="filter-select" onchange="syncCrewFlightFilters('station')">
                             <option value="">Hub: All Stations</option>
                             <option value="DEL">DEL (Delhi Hub)</option>
@@ -2312,9 +2480,12 @@ input, select { font: inherit; color: inherit; }
                             <option value="CCU">CCU (Kolkata)</option>
                             <option value="HYD">HYD (Hyderabad)</option>
                         </select>
-                        <input type="text" id="crewFilterFlightSearch" class="filter-search-input" placeholder="Search flight #, pairing, crew..." oninput="syncCrewFlightFilters('search')">
+
+                        <!-- Search Field -->
+                        <input type="text" id="crewFilterFlightSearch" class="filter-search-input" placeholder="Search flight #, pairing, crew..." oninput="syncCrewFlightFilters('search')" style="max-width:180px;">
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
+
+                    <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
                         <span class="filter-counter-badge" id="crewFlightFilterBadge">Showing Flights</span>
                         <button class="mode-toggle-btn" style="padding:4px 10px; font-size:0.72rem; cursor:pointer;" onclick="switchOCCView('flights')" title="Switch to Full Timeline Gantt">
                             <i class="fa-solid fa-chart-gantt"></i> Open Timeline ↗
@@ -2326,34 +2497,72 @@ input, select { font: inherit; color: inherit; }
             <!-- 3-PANE COCKPIT STAGE -->
             <div class="cockpit-3pane-stage">
             
-            <!-- PANE 1: OPERATIONS NAVIGATION & DISRUPTION SIDEBAR (LEFT NAV BAR) -->
+            <!-- PANE 1: OPERATIONS NAVIGATION & DISRUPTION SIDEBAR (LEFT NAV BAR - MINIMIZED BY DEFAULT) -->
             <section class="pane-radar-left" id="paneOpsLeftNav">
-                <!-- Top Navigation Bar Header & Segmented View Switcher -->
-                <div class="sidebar-nav-header-box">
-                    <div class="sidebar-nav-title-row">
-                        <div style="display:flex; align-items:center; gap:7px;">
-                            <i class="fa-solid fa-bars-staggered" style="color:var(--brand-green-strong); font-size:0.82rem;"></i>
-                            <span style="font-family:var(--font-header); font-size:0.78rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-primary);">Ops Navigator</span>
-                        </div>
-                        <span class="threat-pill green" style="font-size:0.6rem; padding:1px 6px;">● ONLINE</span>
+                <!-- 1. COLLAPSED DOCKED RAIL (VISIBLE BY DEFAULT) -->
+                <div class="ops-nav-collapsed-rail" id="opsNavCollapsedRail" onclick="toggleOpsNav(true)" title="Click to Open Ops Navigator">
+                    <button class="ops-rail-btn" onclick="event.stopPropagation(); toggleOpsNav(true);" title="Open Ops Navigator">
+                        <i class="fa-solid fa-angles-right"></i>
+                    </button>
+                    
+                    <div class="rail-icon-cluster">
+                        <i class="fa-solid fa-bars-staggered" style="color:var(--brand-green-strong); font-size:0.9rem;"></i>
+                        <span class="threat-pill red rail-threat-pill" title="3 Uncrewed Routes at Risk">3</span>
                     </div>
 
-                    <!-- Left Nav Bar Segmented Controls -->
-                    <div class="sidebar-nav-tabs-bar">
-                        <button class="snav-tab-btn active" id="snavBtnAll" onclick="setLeftNavView('all')">
-                            <i class="fa-solid fa-layer-group"></i> All
-                        </button>
-                        <button class="snav-tab-btn" id="snavBtnScen" onclick="setLeftNavView('scenarios')">
-                            <i class="fa-solid fa-bolt"></i> Triggers
-                        </button>
-                        <button class="snav-tab-btn" id="snavBtnRoutes" onclick="setLeftNavView('routes')">
-                            <i class="fa-solid fa-triangle-exclamation"></i> Routes <span class="snav-badge" id="snavRoutesBadge">3</span>
-                        </button>
-                        <button class="snav-tab-btn" id="snavBtnRadar" onclick="setLeftNavView('radar')">
-                            <i class="fa-solid fa-shield-virus"></i> Radar
-                        </button>
+                    <div class="rail-vertical-text">
+                        <span>OPS NAVIGATOR</span>
+                    </div>
+
+                    <div class="rail-bottom-icons">
+                        <div class="rail-mini-icon" title="Scenario Power Triggers (S1-S6)">
+                            <i class="fa-solid fa-bolt" style="color:var(--brand-orange)"></i>
+                        </div>
+                        <div class="rail-mini-icon" title="Uncrewed Routes Review">
+                            <i class="fa-solid fa-triangle-exclamation" style="color:var(--status-critical)"></i>
+                        </div>
+                        <div class="rail-mini-icon" title="Risk Delegation Radar">
+                            <i class="fa-solid fa-shield-virus" style="color:var(--brand-green-strong)"></i>
+                        </div>
                     </div>
                 </div>
+
+                <!-- 2. EXPANDED CONTENT DRAWER (HIDDEN BY DEFAULT UNTIL OPENED OR LOCKED) -->
+                <div class="ops-nav-expanded-content" id="opsNavExpandedContent" style="display:none; flex-direction:column; gap:0.85rem; height:100%; min-height:0; overflow-y:auto;">
+                    <!-- Top Navigation Bar Header with Lock & Minimize Buttons -->
+                    <div class="sidebar-nav-header-box">
+                        <div class="sidebar-nav-title-row">
+                            <div style="display:flex; align-items:center; gap:7px;">
+                                <i class="fa-solid fa-bars-staggered" style="color:var(--brand-green-strong); font-size:0.82rem;"></i>
+                                <span style="font-family:var(--font-header); font-size:0.78rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-primary);">Ops Navigator</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <button class="snav-lock-btn" id="btnLockOpsNav" onclick="toggleOpsNavLock()" title="Lock / Unlock Sidebar Open">
+                                    <i class="fa-solid fa-thumbtack" id="iconLockOpsNav"></i>
+                                    <span id="lblLockOpsNav">Lock</span>
+                                </button>
+                                <button class="snav-minimize-btn" onclick="toggleOpsNav(false)" title="Minimize to Left">
+                                    <i class="fa-solid fa-angles-left"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Left Nav Bar Segmented Controls -->
+                        <div class="sidebar-nav-tabs-bar">
+                            <button class="snav-tab-btn active" id="snavBtnAll" onclick="setLeftNavView('all')">
+                                <i class="fa-solid fa-layer-group"></i> All
+                            </button>
+                            <button class="snav-tab-btn" id="snavBtnScen" onclick="setLeftNavView('scenarios')">
+                                <i class="fa-solid fa-bolt"></i> Triggers
+                            </button>
+                            <button class="snav-tab-btn" id="snavBtnRoutes" onclick="setLeftNavView('routes')">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Routes <span class="snav-badge" id="snavRoutesBadge">3</span>
+                            </button>
+                            <button class="snav-tab-btn" id="snavBtnRadar" onclick="setLeftNavView('radar')">
+                                <i class="fa-solid fa-shield-virus"></i> Radar
+                            </button>
+                        </div>
+                    </div>
 
                 <!-- SECTION 1: SCENARIO POWER TRIGGERS -->
                 <div class="cockpit-box snav-section-card" id="snavSectionScenarios">
@@ -2509,6 +2718,7 @@ input, select { font: inherit; color: inherit; }
                         </div>
                     </div>
                 </div>
+                </div><!-- /opsNavExpandedContent -->
             </section>
 
             <!-- PANE 2: CREW OPS DESK (CENTER HERO - MINIMIZED BY DEFAULT) -->
@@ -2517,19 +2727,16 @@ input, select { font: inherit; color: inherit; }
                     <div style="display:flex; align-items:center; gap:8px;">
                         <h3>
                             <i class="fa-solid fa-headset" style="color:var(--brand-green-strong)"></i>
-                            Crew Ops Copilot
+                            Crew Advisor
                         </h3>
                         <span class="copilot-status-pill" id="copilotStatusPill">
                             ● CAR Sec 7 Deterministic Engine Ready
                         </span>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <button class="btn-copilot-toggle" id="btnToggleCopilot" onclick="toggleChatbotMinimize()" title="Expand or Minimize Copilot Console">
-                            <i class="fa-solid fa-up-right-and-down-left-from-center" id="iconToggleCopilot"></i>
-                            <span id="labelToggleCopilot">Expand Chat</span>
-                        </button>
-                        <button class="icon-btn" style="width:26px; height:26px;" onclick="clearChat()" title="Clear Console">
-                            <i class="fa-solid fa-trash" style="font-size:0.7rem;"></i>
+                        <button class="btn-copilot-toggle" id="btnToggleCopilot" onclick="toggleChatbotMinimize()" title="Switch between Flight Wave Monitor and Crew Advisor">
+                            <i class="fa-solid fa-comments" id="iconToggleCopilot"></i>
+                            <span id="labelToggleCopilot">Open Crew Advisor</span>
                         </button>
                     </div>
                 </div>
@@ -2578,7 +2785,7 @@ input, select { font: inherit; color: inherit; }
                             </span>
                             <span class="verified-metric"><i class="fa-solid fa-circle-check"></i> Deterministic Legal Proof</span>
                         </div>
-                        <div class="card-heading-title">dCortex OCC Crew Operations Copilot Ready</div>
+                        <div class="card-heading-title">dCortex OCC Crew Advisor Ready</div>
                         <p style="font-size:0.82rem; color:var(--ink-secondary); line-height:1.5;">
                             Operational decision support for DGCA CAR Section 7 Series J recovery. I translate colloquial disruption scenarios into formal mathematical queries, enforce hard duty ceilings, and return provably legal, cost-ranked candidate pairings with zero arithmetic hallucinations.
                         </p>
@@ -3126,6 +3333,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ</div>
         // Initial binding to recommended pilot C-3310
         bindCandidateToRightPane('C-3310');
         renderCrewOpsWaveMonitor();
+        initOpsNavState();
     });
 
     // 1. Theme Engine (frontend-next Light/Dark Theme)
@@ -3842,7 +4050,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
                     <span class="verdict-tag pass"><i class="fa-solid fa-shield-check"></i> Solver Online · CAR Sec 7 Active</span>
                     <span class="verified-metric"><i class="fa-solid fa-circle-check"></i> Deterministic Legal Proof</span>
                 </div>
-                <div class="card-heading-title">dCortex OCC Crew Operations Copilot Ready</div>
+                <div class="card-heading-title">dCortex OCC Crew Advisor Ready</div>
                 <p style="font-size:0.82rem; color:var(--ink-secondary); line-height:1.5;">
                     Console cleared. Ready for your next operational query or disruption scenario.
                 </p>
@@ -3907,6 +4115,88 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
     // ==========================================================================
     // LEFT SIDEBAR NAVIGATION BAR CONTROLS
     // ==========================================================================
+    
+    // ==========================================================================
+    // OPS NAVIGATOR MINIMIZE & LOCK CONTROLS
+    // ==========================================================================
+    STATE.opsNavOpen = false;   // Minimized to left by default
+    STATE.opsNavLocked = false; // Unlocked by default
+
+    function initOpsNavState() {
+        const savedLocked = localStorage.getItem('occ-ops-nav-locked') === 'true';
+        if (savedLocked) {
+            STATE.opsNavLocked = true;
+            STATE.opsNavOpen = true;
+        } else {
+            STATE.opsNavLocked = false;
+            STATE.opsNavOpen = false;
+        }
+        applyOpsNavDOM();
+    }
+
+    function toggleOpsNav(open) {
+        if (open !== undefined) {
+            STATE.opsNavOpen = open;
+        } else {
+            STATE.opsNavOpen = !STATE.opsNavOpen;
+        }
+        if (!STATE.opsNavOpen && STATE.opsNavLocked) {
+            STATE.opsNavLocked = false;
+            localStorage.setItem('occ-ops-nav-locked', 'false');
+        }
+        applyOpsNavDOM();
+    }
+
+    function toggleOpsNavLock() {
+        STATE.opsNavLocked = !STATE.opsNavLocked;
+        if (STATE.opsNavLocked) {
+            STATE.opsNavOpen = true;
+            localStorage.setItem('occ-ops-nav-locked', 'true');
+            showToast('Ops Navigator locked open');
+        } else {
+            localStorage.setItem('occ-ops-nav-locked', 'false');
+            showToast('Ops Navigator unlocked (auto-minimizable)');
+        }
+        applyOpsNavDOM();
+    }
+
+    function applyOpsNavDOM() {
+        const stage = document.querySelector('.cockpit-3pane-stage');
+        const rail = document.getElementById('opsNavCollapsedRail');
+        const content = document.getElementById('opsNavExpandedContent');
+        const lockBtn = document.getElementById('btnLockOpsNav');
+        const lockIcon = document.getElementById('iconLockOpsNav');
+        const lockLbl = document.getElementById('lblLockOpsNav');
+
+        const isOpen = STATE.opsNavOpen || STATE.opsNavLocked;
+
+        if (stage) {
+            stage.classList.toggle('ops-nav-open', isOpen);
+        }
+        if (rail) rail.style.display = isOpen ? 'none' : 'flex';
+        if (content) content.style.display = isOpen ? 'flex' : 'none';
+
+        if (lockBtn && lockIcon && lockLbl) {
+            if (STATE.opsNavLocked) {
+                lockBtn.classList.add('locked');
+                lockIcon.className = 'fa-solid fa-lock';
+                lockLbl.textContent = 'Locked';
+                lockBtn.title = 'Click to Unlock (Allow minimizing)';
+            } else {
+                lockBtn.classList.remove('locked');
+                lockIcon.className = 'fa-solid fa-thumbtack';
+                lockLbl.textContent = 'Lock';
+                lockBtn.title = 'Click to Lock / Pin sidebar open';
+            }
+        }
+
+        if (isOpen) {
+            if (STATE.currentRiskData) {
+                renderRadarSpider(STATE.currentRiskData);
+            }
+        }
+    }
+
     function setLeftNavView(view) {
         const btnAll = document.getElementById('snavBtnAll');
         const btnScen = document.getElementById('snavBtnScen');
@@ -3968,8 +4258,8 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
             if (deck) deck.style.display = 'flex';
             if (feed) feed.style.display = 'none';
             if (qb) qb.style.display = 'none';
-            if (icon) icon.className = 'fa-solid fa-up-right-and-down-left-from-center';
-            if (lbl) lbl.textContent = 'Expand Chat';
+            if (icon) icon.className = 'fa-solid fa-comments';
+            if (lbl) lbl.textContent = 'Open Crew Advisor';
             if (pill) pill.innerHTML = '● CAR Sec 7 Deterministic Engine Ready';
             renderCrewOpsWaveMonitor();
         } else {
@@ -3980,9 +4270,9 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
             if (deck) deck.style.display = 'none';
             if (feed) feed.style.display = 'flex';
             if (qb) qb.style.display = 'flex';
-            if (icon) icon.className = 'fa-solid fa-down-left-and-up-right-to-center';
-            if (lbl) lbl.textContent = 'Minimize Chat';
-            if (pill) pill.innerHTML = '● Copilot Active · CAR Sec 7 Solver Running';
+            if (icon) icon.className = 'fa-solid fa-chart-gantt';
+            if (lbl) lbl.textContent = 'Show Flight Monitor';
+            if (pill) pill.innerHTML = '● Crew Advisor Active · CAR Sec 7 Solver Running';
             if (feed) feed.scrollTop = feed.scrollHeight;
         }
     }
@@ -4157,6 +4447,13 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
 
     function setShiftBlock(block) {
         STATE.activeShiftBlock = block;
+
+        // Sync Crew Ops block dropdown
+        const blockSelect = document.getElementById('crewFilterShiftBlock');
+        if (blockSelect && blockSelect.value !== block) {
+            blockSelect.value = block;
+        }
+
         const pills = document.querySelectorAll('.shift-block-pill');
         pills.forEach(p => {
             const id = p.id;
@@ -4175,6 +4472,13 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
 
     function setFlightDate(dateStr) {
         STATE.activeFlightDate = dateStr;
+
+        // Sync Crew Ops date dropdown
+        const dateSelect = document.getElementById('crewFilterDate');
+        if (dateSelect && dateSelect.value !== dateStr) {
+            dateSelect.value = dateStr;
+        }
+
         const dateBtns = document.querySelectorAll('.date-select-btn');
         dateBtns.forEach(b => {
             const isMatch = (dateStr === '2026-09-15' && (b.id === 'dateBtnToday' || b.id === 'crewDateBtnToday')) ||
@@ -4435,7 +4739,7 @@ ACK REQD VIA ACARS CPDLC OR FREQ 131.850 MHZ`;
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px;">
                     <button class="icon-btn" style="padding:6px 14px; border:1px solid var(--hairline); border-radius:6px; font-size:0.75rem;" onclick="closeFlightModal()">Close</button>
                     <button class="btn-authorize-action" style="margin:0; padding:6px 16px; font-size:0.75rem;" onclick="closeFlightModal(); onSelectUncrewedRoute('${f.pairing_id || 'P-2291'}', '${fltNo}', '${isDisrupted ? 'C-1042' : capt}');">
-                        <i class="fa-solid fa-bolt"></i> ${isDisrupted ? 'Recover with dCortex Copilot' : 'Inspect in Crew Ops Desk'}
+                        <i class="fa-solid fa-bolt"></i> ${isDisrupted ? 'Recover with Crew Advisor' : 'Inspect in Crew Ops Desk'}
                     </button>
                 </div>
             `;
