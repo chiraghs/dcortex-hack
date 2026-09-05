@@ -97,6 +97,15 @@ def _flights(snap: Snapshot) -> list[dict[str, Any]]:
         capt = p.crew_in_role("Captain") if p else None
         fo = p.crew_in_role("First Officer") if p else None
         scc = p.crew_in_role("Senior Cabin Crew") if p else None
+        dep_t = f.dep_utc[11:16] if len(f.dep_utc) >= 16 else "00:00"
+        arr_t = f.arr_utc[11:16] if len(f.arr_utc) >= 16 else "00:00"
+        try:
+            dep_min = int(dep_t[:2]) * 60 + int(dep_t[3:5])
+            arr_min = int(arr_t[:2]) * 60 + int(arr_t[3:5])
+            if arr_min < dep_min:
+                arr_min += 1440
+        except Exception:
+            dep_min, arr_min = 0, 120
         out.append({
             "flight_id": fid,
             "flight_no": f.flight_no,
@@ -105,6 +114,10 @@ def _flights(snap: Snapshot) -> list[dict[str, Any]]:
             "arr_station": f.arr_station,
             "dep_utc": f.dep_utc,
             "arr_utc": f.arr_utc,
+            "dep_time": dep_t,
+            "arr_time": arr_t,
+            "dep_min": dep_min,
+            "arr_min": arr_min,
             "block_hours": f.block_hours,
             "aircraft": f.aircraft,
             "aircraft_type": f.aircraft_type,
@@ -165,18 +178,6 @@ def _outreach(snap: Snapshot, data: dict[str, Any]) -> dict[str, Any]:
                 legs.append(f"{fl.flight_no} ({fl.dep_station}→{fl.arr_station})")
     leg_str = ", ".join(legs) if legs else "DX412/DX413"
 
-    whatsapp = (
-        f"⚠️ *dCortex AIR - PRIORITY CREW DISPATCH*\n\n"
-        f"Hello {crank} *{cname}* ({cid}),\n"
-        f"OCC has assigned you to cover pairing *{pid}* on *{pdate}*.\n\n"
-        f"📋 *Assignment Details:*\n"
-        f"• Base: {cbase} | Fleet: {crate}\n"
-        f"• Required Report Time: *{report_utc}*\n"
-        f"• Scheduled Legs: {leg_str}\n"
-        f"• DGCA Compliance: Verified PASS (FDP cap, 12h rest, 60h 7-day limit ok)\n\n"
-        f"Please reply *CONFIRM* to acknowledge and accept duty, or call OCC Dispatch (+91-11-2565-8787)."
-    )
-
     acars = (
         f"QU OCCDELXA\n"
         f".DELOCCX 141800\n"
@@ -213,7 +214,6 @@ def _outreach(snap: Snapshot, data: dict[str, Any]) -> dict[str, Any]:
         "report_utc": report_utc,
         "legs": leg_str,
         "channels": {
-            "whatsapp": whatsapp,
             "acars": acars,
             "sms": sms,
             "voice": voice,
