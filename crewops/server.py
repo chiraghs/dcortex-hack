@@ -351,7 +351,7 @@ EXAMPLES = [
     {"tier": "T1", "q": "How many duty hours does C-1042 have left this week?"},
     {"tier": "T1", "q": "Which flights depart DEL on 2026-09-15?"},
     {"tier": "T1", "q": "Who are the captains based at DEL?"},
-    {"tier": "T2", "q": "Captain C-1042 just called in sick for tomorrow - which flights are now uncrewed?"},
+    {"tier": "T2", "q": "C-1042 just called in sick for tomorrow - which flights are now uncrewed?"},
     {"tier": "T2", "q": "If I move C-2087 onto P-2291, does anyone breach a duty limit?"},
     {"tier": "T2", "q": "Can reserve C-3305 cover the full pairing P-2291?"},
     {"tier": "T2", "q": "BLR is closed 08:00 to 14:00 on 2026-09-17 - what is the crew impact?"},

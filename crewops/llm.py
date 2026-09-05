@@ -91,6 +91,59 @@ class LLM:
         return (r.choices[0].message.content or "").strip()
 
 
+class _NimChatCompletions:
+    def __init__(self, base_url: str, api_key: str, timeout: float):
+        self.base_url = base_url.rstrip("/")
+        self.api_key = api_key
+        self.timeout = timeout
+
+    def create(self, **kwargs: Any) -> Any:
+        import json
+        import urllib.request
+        url = f"{self.base_url}/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+        data: dict[str, Any] = {
+            "model": kwargs.get("model"),
+            "messages": kwargs.get("messages", []),
+            "temperature": kwargs.get("temperature", 0.0),
+            "max_tokens": kwargs.get("max_tokens", 600),
+        }
+        if "extra_body" in kwargs and isinstance(kwargs["extra_body"], dict):
+            data.update(kwargs["extra_body"])
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(data).encode("utf-8"),
+            headers=headers,
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+            body = json.loads(resp.read().decode("utf-8"))
+
+        choice_text = ""
+        choices = body.get("choices") or []
+        if choices:
+            msg = choices[0].get("message") or {}
+            choice_text = msg.get("content") or ""
+
+        return type("ChatCompletion", (), {
+            "choices": [
+                type("Choice", (), {
+                    "message": type("Message", (), {"content": choice_text})()
+                })()
+            ]
+        })()
+
+
+class _NimClient:
+    def __init__(self, base_url: str, api_key: str, timeout: float):
+        self.chat = type("Chat", (), {
+            "completions": _NimChatCompletions(base_url, api_key, timeout)
+        })()
+
+
 def get_client(prefer: str | None = None) -> LLM | None:
     """Return a configured provider, or None to run deterministic-only."""
     load_env()
@@ -100,19 +153,26 @@ def get_client(prefer: str | None = None) -> LLM | None:
     order = [prefer] if prefer else ["nvidia", "anthropic"]
     for provider in order:
         if provider == "nvidia" and os.environ.get("NVIDIA_API_KEY"):
-            try:
-                from openai import OpenAI
-            except ImportError:
-                continue
             model = os.environ.get("CREWOPS_MODEL") or DEFAULT_MODELS["nvidia"]
             if "/" not in model:
                 model = DEFAULT_MODELS["nvidia"]
-            return LLM("nvidia", model, OpenAI(
-                base_url=os.environ.get(
-                    "NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
-                api_key=os.environ["NVIDIA_API_KEY"],
-                timeout=float(os.environ.get("CREWOPS_TIMEOUT", "12")),
-                max_retries=0))
+            timeout = float(os.environ.get("CREWOPS_TIMEOUT", "30"))
+            base_url = os.environ.get(
+                "NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"
+            )
+            api_key = os.environ["NVIDIA_API_KEY"]
+            client: Any = None
+            try:
+                from openai import OpenAI
+                client = OpenAI(
+                    base_url=base_url,
+                    api_key=api_key,
+                    timeout=timeout,
+                    max_retries=1,
+                )
+            except ImportError:
+                client = _NimClient(base_url, api_key, timeout)
+            return LLM("nvidia", model, client)
 
         if provider == "anthropic" and os.environ.get("ANTHROPIC_API_KEY"):
             try:
